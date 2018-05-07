@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.net.*?>
+<?import java.util.*?>
+<?import javafx.collections.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.web.*?>
+
+<GridPane id="gridPane" prefHeight="1000.0" prefWidth="800.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="journal.JournalController">
+  <columnConstraints>
+    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+  </columnConstraints>
+  <padding>
+    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+  </padding>
+  <rowConstraints>
+    <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+  </rowConstraints>
+  <stylesheets>
+    <URL value="@journal.css" />
+  </stylesheets>
+  <BorderPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="0" GridPane.rowIndex="0">
+    <left>
+      <TabPane fx:id="entryPane" onMouseClicked="#handleNewEntry" opacity="1.0" prefHeight="952.0000999999975" prefWidth="780.0" rotateGraphic="false" side="LEFT" tabClosingPolicy="ALL_TABS">
+        <tabs>
+          <Tab fx:id="newEntry" closable="false" disable="false" text="+">
+            <content>
+              <AnchorPane id="Content" disable="true" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+            </content>
+          </Tab>
+        </tabs>
+      </TabPane>
+    </left>
+    <top>
+      <VBox prefHeight="28.0" prefWidth="780.0">
+        <children>
+          <MenuBar id="menu" prefWidth="780.0">
+            <menus>
+              <Menu id="" mnemonicParsing="false" text="File">
+                <items>
+                  <MenuItem mnemonicParsing="false" onAction="#createNewEntry" text="New Entry" visible="true" fx:id="menuCreateNewEntry" />
+                  <MenuItem mnemonicParsing="false" text="Open" />
+                  <MenuItem mnemonicParsing="false" onAction="#saveEntry" text="Save" />
+                  <MenuItem mnemonicParsing="false" text="Save As" />
+                  <MenuItem mnemonicParsing="false" onAction="#closeApp" text="Close" fx:id="menuClose" />
+                </items>
+              </Menu>
+              <Menu mnemonicParsing="false" text="Edit">
+                <items>
+                  <MenuItem mnemonicParsing="false" text="Delete" />
+                </items>
+              </Menu>
+              <Menu mnemonicParsing="false" text="Help">
+                <items>
+                  <MenuItem mnemonicParsing="false" text="About" />
+                </items>
+              </Menu>
+            </menus>
+            <stylesheets>
+              <URL value="@journal.css" />
+            </stylesheets>
+          </MenuBar>
+        </children>
+      </VBox>
+    </top>
+  </BorderPane>
+</GridPane>
