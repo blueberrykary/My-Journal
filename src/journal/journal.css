@@ -1,0 +1,31 @@
+/*
+ * Empty Stylesheet file.
+ */
+
+.mainFxmlClass {
+
+}
+
+#gridPane{
+    -fx-background-color: #005DAA;
+    -fx-color: #FFD200;
+}
+
+#newEntry{
+    -fx-font-weight: bolder;
+    -fx-background-color: #005DAA;
+    -fx-color: #FFD200;
+}
+
+#textArea{
+    -fx-font-size: 25px;
+    -fx-fill:whitesmoke;
+}
+
+entryPane{
+    -fx-color: #FFD200;
+}
+
+menu{
+    -fx-color: #FFD200;
+}
