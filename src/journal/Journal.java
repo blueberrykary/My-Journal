@@ -18,10 +18,6 @@ import javafx.scene.control.TabPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
-/**
- *
- * @author spric
- */
 public class Journal extends Application {
     
     @Override
@@ -41,6 +37,13 @@ public class Journal extends Application {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        //Thread[] threads = new Thread[4];
+        
+        // Start up the server when the journal loads.
+        JournalServer server = new JournalServer(1707);
+        server.start();
+        
+        //Launch GUI.
         launch(args);
     }
     
