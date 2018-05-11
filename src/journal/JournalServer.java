@@ -12,64 +12,43 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.ArrayList;
 
 public class JournalServer extends Thread{
-    private SimpleDateFormat df;
+    private ArrayList<JournalThread> entries;
     private int port;
-    Socket socket;
-    ObjectInputStream sInput;
     private boolean kill;
     
     public JournalServer(int port){
         this.port = port;
-        this.df = new SimpleDateFormat("HH:mm:ss");
         this.kill = false;
     }
     
     public void run(){
         try{
-            JournalEntry entry;
             ServerSocket serverSocket = new ServerSocket(this.port);
             
-            System.out.format("Server waiting for connections on port: %d\n", this.port);
-            socket = serverSocket.accept();
-            sInput = new ObjectInputStream(socket.getInputStream());
-                
-            while(!kill && !socket.isClosed()){
+            while(!kill){
+                System.out.format("Server waiting for connections on port: %d\n", this.port);
+                Socket socket = serverSocket.accept();
                 
                 //Exit if kill
                 if(kill)break;
                 
-                try{
-                    entry = (JournalEntry) sInput.readObject();
-                } catch(Exception ex){
-                    System.err.format(ex + " Error reading journal entry.\n");
-                    break;
-                }
-                
-                switch(entry.getAction()){
-                    case JournalEntry.SAVE:
-                        saveEntry(entry.getName(), entry.getContent(), false);
-                        System.out.format("Journal is saving.\n");
-                        break;
-                    case JournalEntry.SAVEAS:
-                        saveAsEntry(entry.getName(), entry.getContent());
-                        System.out.format("Journal is savedAs.\n");
-                        break;
-                    case JournalEntry.QUIT:
-                        System.out.format("Journal is closing.\n");
-                        kill = true;
-                        break;
-                }
+                JournalThread tmp = new JournalThread(socket);
+                entries.add(tmp);
+                tmp.start();
             }
-            
-            close();
             
             // Exit server
             try{
                 serverSocket.close();
+                for(int i=0; i< entries.size(); i++){
+                    //Kill all clients nicely
+                    JournalThread tmp = entries.get(i);
+                    tmp.sInput.close();
+                    tmp.socket.close();
+                }
             }catch(Exception ex){
                 System.err.format("Closing server crashed: %s\n", ex);
             }
@@ -79,29 +58,66 @@ public class JournalServer extends Thread{
         }
     }
     
-    public void saveAsEntry(String entryName, String entryText) throws IOException{
-        saveEntry(entryName, entryText, true);
-    }
-    
-    public void saveEntry(String entryName, String entryText, boolean saveAs) throws IOException{
-        if (saveAs){
-            // creates the file.
+    // Make one entry per save.
+    class JournalThread extends Thread{
+        Socket socket;
+        ObjectInputStream sInput;
+        JournalEntry entry;
+        
+        private JournalThread(Socket socket) {
+            this.socket = socket;
+            try{
+                sInput = new ObjectInputStream(socket.getInputStream());
+            }catch(Exception ex){
+                System.err.format(ex + " Error creating streams in journal user.\n");
+            }
+        }
+        
+        public void run(){
+            boolean kill = false;
+            while(!kill){
+                try{
+                    entry = (JournalEntry) sInput.readObject();
+                } catch(Exception ex){
+                    System.err.format(ex + " Error reading journal entry.\n");
+                    break;
+                }
+                
+                switch(entry.getAction()){
+                    case JournalEntry.SAVE:
+                        try {
+                            saveEntry(entry.getName(), entry.getContent());
+                        } catch (IOException ex) {
+                            System.out.format("Error saving journal.\n");
+                        }
+                        System.out.format("Journal is saving.\n");
+                        break;
+                    case JournalEntry.QUIT:
+                        System.out.format("Journal is closing.\n");
+                        kill = true;
+                        break;
+                }
+            }
+            close();
+        }
+        
+        private void saveEntry(String entryName, String entryText) throws IOException{
+            
             File file = new File(entryName + ".txt");
             file.createNewFile();
             System.out.format("Journal file has been created.\n");
+
+            // Save journal entry to server.
+            try(FileWriter fr = new FileWriter(entryName + ".txt", false);
+                    BufferedWriter bw = new BufferedWriter(fr)){
+                bw.write(entryText);
+                System.out.format("Journal has been saved.\n");
+            }catch(Exception ex){
+
+            }
         }
         
-        // Save journal entry to server.
-        try(FileWriter fr = new FileWriter(entryName + ".txt", false);
-                BufferedWriter bw = new BufferedWriter(fr)){
-            bw.write(entryText);
-            System.out.format("Journal has been saved.\n");
-        }catch(Exception ex){
-            
-        }
-    }
-    
-    private void close(){
+        private void close(){
             //close things that are not null
             try{
                 if(sInput != null) sInput.close();
@@ -110,4 +126,5 @@ public class JournalServer extends Thread{
                 System.err.format("Error closing server.");
             }
         }
+    }
 }

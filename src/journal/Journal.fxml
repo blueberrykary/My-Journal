@@ -45,7 +45,6 @@
                   <MenuItem mnemonicParsing="false" onAction="#createNewEntry" text="New Entry" visible="true" fx:id="menuCreateNewEntry" />
                   <MenuItem mnemonicParsing="false" text="Open" />
                   <MenuItem mnemonicParsing="false" onAction="#saveEntry" text="Save" />
-                  <MenuItem mnemonicParsing="false" onAction="#saveAsEntry" text="Save As" />
                   <MenuItem mnemonicParsing="false" onAction="#closeApp" text="Close" fx:id="menuClose" />
                 </items>
               </Menu>

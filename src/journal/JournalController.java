@@ -14,6 +14,8 @@ import java.util.Optional;
 import javafx.fxml.FXML;
 import java.util.ResourceBundle;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
@@ -38,7 +40,7 @@ public class JournalController implements Initializable {
     
     private ObjectOutputStream sOutput;
     private Socket socket;
-    private String server, userName, entryText;
+    private String server, entryText;
     Optional<String> entryName;
     private int port;
     
@@ -55,9 +57,8 @@ public class JournalController implements Initializable {
             server = InetAddress.getLocalHost().getHostAddress(); //sleipnir.cs.csub.edu";
         }
         catch(UnknownHostException ex){
-            System.err.format("Err host unkown./n");
+            System.err.format("Err host unknown./n");
         }
-        userName = System.getProperty("user.name");
         
         boolean isConnected = false;
         
@@ -69,6 +70,11 @@ public class JournalController implements Initializable {
             } catch(Exception ex) {
                 System.err.format("Err connecting to server %s on port %d: %s\n", 
                         this.server, this.port, ex);
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException ex1) {
+                    Logger.getLogger(JournalController.class.getName()).log(Level.SEVERE, null, ex1);
+                }
             }
         }
         
@@ -104,10 +110,6 @@ public class JournalController implements Initializable {
         }
     }
     
-    public void saveAsEntry(){
-        performJournalAction(JournalEntry.SAVEAS);
-    }
-    
     public void saveEntry(){
         performJournalAction(JournalEntry.SAVE);
     }
@@ -117,26 +119,21 @@ public class JournalController implements Initializable {
         entryText = ((TextArea)entryContent).textProperty().getValue();
         
         // if it doesn't start return
-        if(!start()) return;
+        try {
+            sOutput = new ObjectOutputStream(socket.getOutputStream());
+            //sOutput.reset();
+        } catch(Exception ex) {
+            System.err.format("Err creating streams %s \n", ex);
+            return;
+        }
         
+        // send journal entry for saving
         try {
             System.out.format("Sending journal object.\n");
             sOutput.writeObject(new JournalEntry(entryName.get(), entryText, action));
         } catch(Exception ex) {
             System.err.format("Error sending journal object.\n");
         }
-    }
-    
-    public boolean start(){
-        try {
-            sOutput = new ObjectOutputStream(socket.getOutputStream());
-            sOutput.reset();
-        } catch(Exception ex) {
-            System.err.format("Err creating streams %s \n", ex);
-            return false;
-        }
-   
-        return true;
     }
     
     public void disconnect(){

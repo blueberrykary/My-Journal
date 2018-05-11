@@ -9,7 +9,7 @@ import java.io.Serializable;
 
 public class JournalEntry implements Serializable{
     // Types
-    static final int SAVE = 0, SAVEAS = 1, QUIT = 2;
+    static final int SAVE = 0, QUIT = 1;
     private String entryName;
     private String entryContent;
     private int action;
